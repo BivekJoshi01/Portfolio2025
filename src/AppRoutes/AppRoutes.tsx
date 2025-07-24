@@ -1,13 +1,19 @@
 import React from "react";
+import { HashRouter, Route, Routes } from "react-router-dom";
+import AppLayout from "../components/LayoutC/AppLayout";
 
 const AppRoutes: React.FC = () => {
   return (
-    <div>
-      <h1>cxsdcsdcsdc</h1>
-      <h1>cxsdcsdcsdc</h1>
-      <h1>cxsdcsdcsdc</h1>
-      <h1>cxsdcsdcsdc</h1>
-    </div>
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<AppLayout />}>
+          <Route index />
+          <Route path="about-me" />
+          <Route path="exprience" />
+          <Route path="education" />
+        </Route>
+      </Routes>
+    </HashRouter>
   );
 };
 

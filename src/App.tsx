@@ -9,7 +9,7 @@ const App: React.FC = () => {
     <div
       style={{
         position: "relative",
-        backgroundColor: "#03000a",
+        background: "linear-gradient(135deg, #010204 0%, #090a0f 50%, #000000 100%)",
         minHeight: "100vh",
         maxWidth: "100vw",
         overflow: "hidden",
