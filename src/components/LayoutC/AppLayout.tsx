@@ -28,11 +28,11 @@ const AppLayout: React.FC = () => {
 
   return (
     <div>
-      <div style={{ position: "sticky", top: 0, zIndex: 10 }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 10,marginBottom:"95px" }}>
         <NavbarC />
       </div>
 
-      <div ref={aboutRef}>
+      <div ref={aboutRef} style={{backgroundColor:''}}>
         <AboutMe />
       </div>
 
@@ -42,6 +42,7 @@ const AppLayout: React.FC = () => {
 
       <div ref={educationRef}>
         <Education />
+
       </div>
     </div>
   );
