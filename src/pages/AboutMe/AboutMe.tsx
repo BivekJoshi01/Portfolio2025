@@ -13,7 +13,7 @@ const AboutMe: React.FC = () => {
           {/* Image */}
           <div className="w-152 h-96 rounded-xl overflow-hidden border-4 border-indigo-500 shadow-md">
             <img
-              // src={BivekImage}
+              src={BivekImage}
               alt="Bivek Joshi"
               className="w-full h-full object-cover"
             />

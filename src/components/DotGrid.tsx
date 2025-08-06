@@ -1,116 +1,119 @@
-// DotGrid.tsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
 
 interface DotGridProps {
-  dotSize: number;
-  gap: number;
-  baseColor: string;
-  activeColor: string;
-  proximity: number;
-  shockStrength: number;
-  resistance: number;
+  dotSize?: number;
+  gap?: number;
+  baseColor?: string;
+  activeColor?: string;
+  hoverRadius?: number;
+  scrollWaveHeight?: number;
   style?: React.CSSProperties;
 }
 
-type Dot = {
-  x: number;
-  y: number;
-  offsetX: number;
-  offsetY: number;
-};
-
 const DotGrid: React.FC<DotGridProps> = ({
-  dotSize,
-  gap,
-  baseColor,
-  activeColor,
-  proximity,
-  shockStrength,
-  resistance,
+  dotSize = 1.5,
+  gap = 25,
+  baseColor = 'rgba(150, 150, 255, 0.15)',
+  activeColor = 'rgba(255, 255, 255, 0.8)',
+  hoverRadius = 60,
   style = {},
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const mouse = useRef<{ x: number; y: number }>({ x: -9999, y: -9999 });
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mousePos = useRef({ x: -1000, y: -1000 });
+  const dotsRef = useRef<Array<{ x: number; y: number }>>([]);
+  const animationFrame = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
-      canvas.height = document.body.scrollHeight;
+      canvas.height = window.innerHeight; 
+      initializeDots();
     };
 
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    const initializeDots = () => {
+      dotsRef.current = [];
+      if (!canvas) return;
+
+      for (let y = gap / 2; y < canvas.height; y += gap) {
+        for (let x = gap / 2; x < canvas.width; x += gap) {
+          dotsRef.current.push({ x, y });
+        }
+      }
+    };
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouse.current.x = e.clientX;
-      mouse.current.y = e.clientY;
+      mousePos.current = { x: e.clientX, y: e.clientY };
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', handleMouseMove);
 
-    const dots: Dot[] = [];
-
-    for (let y = gap / 2; y < canvas.height; y += gap) {
-      for (let x = gap / 2; x < canvas.width; x += gap) {
-        dots.push({ x, y, offsetX: 0, offsetY: 0 });
-      }
-    }
+    resizeCanvas();
 
     const animate = () => {
+      if (!canvas || !ctx) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      for (const dot of dots) {
-        const dx = mouse.current.x - (dot.x + dot.offsetX);
-        const dy = mouse.current.y - (dot.y + dot.offsetY);
-        const dist = Math.sqrt(dx * dx + dy * dy);
+      const mouse = mousePos.current;
 
-        if (dist < proximity) {
-          const angle = Math.atan2(dy, dx);
-          const force = (1 - dist / proximity) * shockStrength;
-          dot.offsetX -= Math.cos(angle) * force * gap;
-          dot.offsetY -= Math.sin(angle) * force * gap;
+      dotsRef.current.forEach(dot => {
+        const dx = mouse.x - dot.x;
+        const dy = mouse.y - dot.y;
+        const distToMouse = Math.sqrt(dx * dx + dy * dy);
+
+        let hoverEffect = 0;
+        if (distToMouse < hoverRadius) {
+          hoverEffect = Math.pow(1 - distToMouse / hoverRadius, 2);
         }
 
-        // Apply resistance
-        dot.offsetX *= resistance;
-        dot.offsetY *= resistance;
-
-        const renderX = dot.x + dot.offsetX;
-        const renderY = dot.y + dot.offsetY;
-
+        const size = dotSize + hoverEffect * dotSize * 1.5;
+        
+        // Draw the dot
         ctx.beginPath();
-        ctx.arc(renderX, renderY, dotSize, 0, Math.PI * 2);
-        ctx.fillStyle = dist < proximity ? activeColor : baseColor;
+        ctx.arc(dot.x, dot.y, size, 0, Math.PI * 1);
+        
+        // Color interpolation
+        if (hoverEffect > 0) {
+          const alpha = 0.15 + hoverEffect * 0.15;
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        } else {
+          ctx.fillStyle = baseColor;
+        }
+        
         ctx.fill();
-        ctx.closePath();
-      }
+      });
 
-      requestAnimationFrame(animate);
+      animationFrame.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrame.current = requestAnimationFrame(animate);
 
+    // Cleanup
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationFrame.current);
     };
-  }, [dotSize, gap, baseColor, activeColor, proximity, shockStrength, resistance]);
+  }, [dotSize, gap, baseColor, activeColor, hoverRadius]);
 
   return (
     <canvas
       ref={canvasRef}
       style={{
-        position: "absolute",
+        position: 'fixed', // Changed from fixed to absolute would also work
         top: 0,
         left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
         zIndex: 0,
-        pointerEvents: "none",
         ...style,
       }}
     />

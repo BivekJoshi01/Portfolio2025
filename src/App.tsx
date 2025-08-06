@@ -1,4 +1,3 @@
-// App.tsx
 import React from "react";
 import "./App.css";
 import DotGrid from "./components/DotGrid";
@@ -9,24 +8,28 @@ const App: React.FC = () => {
     <div
       style={{
         position: "relative",
-        background: "linear-gradient(135deg, #010204 0%, #090a0f 50%, #000000 100%)",
+        background: "black",
         minHeight: "100vh",
         maxWidth: "100vw",
-        overflow: "hidden",
+        overflowX: "hidden",
       }}
     >
       <DotGrid
         dotSize={1}
-        gap={25}
-        baseColor="rgba(200,200,255,0.3)"
-        activeColor="rgba(100,150,255,1)"
-        proximity={100}
-        shockStrength={0.7}
-        resistance={0.5}
+        gap={18}
+        baseColor="rgba(180, 180, 255, 0.2)"
+        activeColor="rgba(255, 255, 255, 0.9)"
+        hoverRadius={150}
       />
 
-      {/* Foreground content */}
-      <div style={{ position: "relative", zIndex: 1, color: "white" }}>
+      {/* Foreground content with scroll */}
+      <div style={{ 
+        position: "relative", 
+        zIndex: 1, 
+        color: "white",
+        height: "100vh",
+        overflowY: "auto" 
+      }}>
         <AppRoutes />
       </div>
     </div>
